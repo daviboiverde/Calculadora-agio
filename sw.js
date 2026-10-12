@@ -1,6 +1,6 @@
 /* Service worker do Simulador de Ágio do Garrote.
    Ao publicar uma versão nova, troque o número em VERSION para o iPhone baixar os arquivos novos. */
-var VERSION = 'agio-v1.0';
+var VERSION = 'agio-v1.1';
 var FILES = [
   './',
   './index.html',

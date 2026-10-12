@@ -172,15 +172,6 @@ details[open] summary::after{content:"–"}
 .foot{font-size:13px;line-height:1.5;color:var(--muted);margin:0;max-width:68ch}
 .ver{font-size:12px;color:var(--muted);margin:0;opacity:.8}
 
-/* aviso de instalação (só no Safari do iPhone, fora do app) */
-.install{position:fixed;left:var(--gutter-l);right:var(--gutter-r);bottom:calc(var(--s3) + env(safe-area-inset-bottom, 0px));z-index:10;
-  max-width:520px;margin:0 auto;background:var(--band-bg);color:var(--band-fg);border:1px solid var(--gold);border-radius:var(--r-md);
-  padding:var(--s3) var(--s2) var(--s3) var(--s4);display:flex;align-items:center;gap:var(--s2);box-shadow:0 6px 24px rgba(0,0,0,.3);font-size:14px;line-height:1.4}
-.install p{margin:0;flex:1}
-.install b{color:var(--gold)}
-.install svg{vertical-align:-3px}
-.install button{flex:none;width:var(--tap);height:var(--tap);border:0;background:transparent;color:var(--band-fg);font-size:22px;cursor:pointer;border-radius:var(--r-sm)}
-.has-install .wrap{padding-bottom:calc(120px + env(safe-area-inset-bottom, 0px))}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important}input[type=range]:active::-webkit-slider-thumb{transform:none}}
 </style>
@@ -292,15 +283,9 @@ details[open] summary::after{content:"–"}
 </section>
 
 <p class="foot">Resultado = peso final × boi − peso de compra × garrote − @ pasto × custo pasto − @ confinamento × custo confinamento. Rentabilidade = resultado ÷ (compra do garrote + custo das @ a pasto). Cabeças/ha = lotação × 450 kg ÷ peso vivo de compra. Lucro/ha = resultado por cabeça × cabeças/ha. Os valores iniciais são exemplos; ajuste para os seus números.</p>
-<p class="ver">Versão 1.0 · funciona sem internet depois de aberto uma vez</p>
+<p class="ver">Versão 1.1 · funciona sem internet depois de aberto uma vez</p>
 </main>
 
-<div class="install" id="install" hidden role="dialog" aria-label="Instalar o app">
-  <p>Para instalar: toque em <b>Compartilhar</b>
-    <svg width="16" height="18" viewBox="0 0 16 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 11V1M4.5 4.5 8 1l3.5 3.5M3 7.5H1.5v9h13v-9H13" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    e depois em <b>Adicionar à Tela de Início</b>.</p>
-  <button type="button" id="install-x" aria-label="Fechar aviso">×</button>
-</div>
 
 <script>
 var DEF={t:20,w:12,pp:5,cp:180,pc:6,cc:280,g0:400,g1:480,gs:10,o0:300,o1:400,os:10,mode:2,sg:440,sb:370,lot:6};
@@ -395,15 +380,6 @@ function draw(){
 }
 setMode(S.mode);
 
-/* aviso de instalação no iPhone/iPad (Safari, fora do modo app) */
-(function(){
-  var ua=navigator.userAgent||'';
-  var ios=/iphone|ipad|ipod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  var standalone=navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
-  var dismissed=false;try{dismissed=localStorage.getItem(KEY+'-install')==='1'}catch(e){}
-  if(ios&&!standalone&&!dismissed){$('install').hidden=false;document.body.classList.add('has-install')}
-  $('install-x').onclick=function(){$('install').hidden=true;document.body.classList.remove('has-install');try{localStorage.setItem(KEY+'-install','1')}catch(e){}};
-})();
 
 /* modo offline */
 if('serviceWorker' in navigator&&location.protocol!=='file:'){
