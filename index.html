@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ágio do Garrote</title>
+<meta name="description" content="Simulador de ágio do garrote × boi gordo, com produção a pasto e no confinamento. Fazendas Boi Verde.">
+<meta name="theme-color" content="#14301f">
+<meta name="color-scheme" content="light dark">
+<!-- iPhone: abre em tela cheia, sem barra de endereço -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ágio Garrote">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="preload" href="fonts/source-sans-3-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/source-serif-4-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Source Sans 3";font-style:normal;font-weight:400;font-display:swap;src:url(fonts/source-sans-3-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Source Sans 3";font-style:normal;font-weight:600;font-display:swap;src:url(fonts/source-sans-3-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Source Sans 3";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/source-sans-3-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Source Serif 4";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/source-serif-4-latin-700-normal.woff2) format("woff2")}
+
+/* Layout: app de coluna única. Faixa de marca verde-escura atrás da barra de status, meta em destaque,
+   controles por fase, resultados, tabela de sensibilidade e cenário. Espaçamento em escala de 4 px. */
+:root{
+  /* cor */
+  --bg:#edf1ec; --surface:#ffffff; --line:#cfd9ce; --fg:#14301f; --muted:#4a5e50;
+  --accent:#2e5d34; --on-accent:#ffffff; --accent-bg:#dfeadd; --accent-fg:#1f4526;
+  --gold:#c9a54e; --band-bg:#14301f; --band-fg:#f1f4ee; --band-muted:#b4c5b8;
+  --neg:#b3302c;
+  --b0-bg:#b3302c; --b0-fg:#ffffff;
+  --b1-bg:#efdcc8; --b1-fg:#7a3d12;
+  --b2-bg:#f1e6b9; --b2-fg:#5e4a06;
+  --b3-bg:#d3e5cf; --b3-fg:#1f4526;
+  --b4-bg:#98c49b; --b4-fg:#10331a;
+  --b5-bg:#2e5d34; --b5-fg:#ffffff;
+  /* tipo */
+  --font-display:"Source Serif 4",Cambria,Georgia,"Times New Roman",serif;
+  --font-body:"Source Sans 3",Calibri,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  /* espaço */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px;
+  --tap:44px; --r-sm:4px; --r-md:8px;
+  --gutter-l:max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r:max(16px, env(safe-area-inset-right, 0px));
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1912; --surface:#15251a; --line:#2c4232; --fg:#e6ede6; --muted:#a3b7a9;
+  --accent:#8fc596; --on-accent:#0b1f10; --accent-bg:#1f3a27; --accent-fg:#c6e6ca;
+  --gold:#d6b45f; --band-bg:#102619; --band-fg:#f1f4ee; --band-muted:#b4c5b8;
+  --neg:#f08a84;
+  --b0-bg:#c4403b; --b0-fg:#ffffff;
+  --b1-bg:#4a3220; --b1-fg:#f1cfae;
+  --b2-bg:#4a4010; --b2-fg:#f1e08e;
+  --b3-bg:#24432b; --b3-fg:#c3e6c7;
+  --b4-bg:#3f7a4b; --b4-fg:#f2fbf3;
+  --b5-bg:#6fb17a; --b5-fg:#0b1f10;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1912; --surface:#15251a; --line:#2c4232; --fg:#e6ede6; --muted:#a3b7a9;
+  --accent:#8fc596; --on-accent:#0b1f10; --accent-bg:#1f3a27; --accent-fg:#c6e6ca;
+  --gold:#d6b45f; --band-bg:#102619; --band-fg:#f1f4ee; --band-muted:#b4c5b8;
+  --neg:#f08a84;
+  --b0-bg:#c4403b; --b0-fg:#ffffff;
+  --b1-bg:#4a3220; --b1-fg:#f1cfae;
+  --b2-bg:#4a4010; --b2-fg:#f1e08e;
+  --b3-bg:#24432b; --b3-fg:#c3e6c7;
+  --b4-bg:#3f7a4b; --b4-fg:#f2fbf3;
+  --b5-bg:#6fb17a; --b5-fg:#0b1f10;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{background:var(--bg);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.5;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button,input{font-family:inherit}
+
+/* faixa de marca: fica atrás da barra de status do iPhone */
+.band{background:var(--band-bg);color:var(--band-fg);border-bottom:3px solid var(--gold);
+  padding-top:calc(env(safe-area-inset-top, 0px) + var(--s5));padding-bottom:var(--s5);
+  padding-left:var(--gutter-l);padding-right:var(--gutter-r)}
+.band-in{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:var(--s1)}
+.logo{display:block;width:156px;max-width:46%;height:auto;margin:0 0 var(--s3) -6px}
+.band h1{font-family:var(--font-display);font-weight:700;font-size:30px;line-height:1.1;margin:0;text-wrap:balance}
+.band .sub{margin:0;color:var(--band-muted);font-size:15px;line-height:1.4}
+
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:var(--s4);
+  padding-left:var(--gutter-l);padding-right:var(--gutter-r);
+  padding-top:var(--s4);padding-bottom:calc(var(--s6) + env(safe-area-inset-bottom, 0px))}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--s4);
+  display:flex;flex-direction:column;gap:var(--s3);min-width:0}
+.panel h2{font-family:var(--font-body);font-weight:700;font-size:13px;line-height:1.3;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);margin:0}
+.goal{border:2px solid var(--accent);border-top:4px solid var(--gold)}
+.goal h2{color:var(--accent)}
+.goal-row{display:flex;align-items:center;gap:var(--s4)}
+.goalv{font-family:var(--font-display);font-size:40px;font-weight:700;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums;min-width:3.2ch}
+.goal-row input{flex:1;min-width:0}
+
+/* campos: rótulo, régua e caixa numérica */
+.phases{display:flex;flex-direction:column;gap:var(--s4)}
+@media (min-width:640px){.phases{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 108px;gap:var(--s1) var(--s3);align-items:center}
+.row label{font-size:15px;color:var(--muted);grid-column:1/-1}
+.num{display:flex;align-items:center;min-height:var(--tap);border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg);overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.num input{width:100%;min-width:0;align-self:stretch;min-height:42px;border:0;background:transparent;color:var(--fg);font-weight:700;font-size:17px;padding:var(--s2) var(--s1) var(--s2) var(--s2);text-align:right;font-variant-numeric:tabular-nums}
+.num span{font-size:13px;color:var(--muted);padding-right:var(--s2);white-space:nowrap}
+.num input:focus{outline:none}
+.num:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+
+/* régua com área de toque de 44 px e trilho preenchido */
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:var(--tap);margin:0;background:transparent;cursor:pointer;--p:50%}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(var(--accent),var(--accent)) 0/var(--p) 100% no-repeat,var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;margin-top:-10px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.35)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:6px;border-radius:3px;background:var(--accent)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--accent);border:3px solid var(--surface)}
+input[type=range]:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:var(--r-sm)}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
+
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s2)}
+.stat{background:var(--bg);border-radius:var(--r-sm);padding:var(--s2) var(--s3);min-width:0;border-left:3px solid var(--gold);display:flex;flex-direction:column;gap:2px}
+.stat .l{font-size:13px;color:var(--muted);line-height:1.3}
+.stat .v{font-family:var(--font-display);font-weight:700;font-size:21px;line-height:1.2;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.stat .v.neg{color:var(--neg)}
+
+.seg{display:flex;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+.seg button{flex:1;min-height:var(--tap);border:0;background:transparent;color:var(--muted);font-weight:700;font-size:15px;padding:var(--s2);cursor:pointer;transition:background-color .15s,color .15s}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--on-accent)}
+.seg button:active{opacity:.75}
+button:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+
+.sel-info{font-size:14px;color:var(--fg);background:var(--accent-bg);border-radius:var(--r-sm);padding:var(--s2) var(--s3);margin:0;font-variant-numeric:tabular-nums}
+.sel-info b{color:var(--accent-fg)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r-sm)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13px;min-width:580px}
+th:first-child{position:sticky;left:0;z-index:1}
+th,td{height:40px;padding:0 var(--s1);text-align:center;border:1px solid var(--line);white-space:nowrap}
+th{font-weight:700;font-size:13px;color:var(--muted);background:var(--bg)}
+#tb td{cursor:pointer}
+#tb td:active{filter:brightness(.92)}
+td.sel{outline:3px solid var(--gold);outline-offset:-3px;font-weight:700}
+td.hit{text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px}
+.k0{background:var(--b0-bg);color:var(--b0-fg)}.k1{background:var(--b1-bg);color:var(--b1-fg)}.k2{background:var(--b2-bg);color:var(--b2-fg)}
+.k3{background:var(--b3-bg);color:var(--b3-fg)}.k4{background:var(--b4-bg);color:var(--b4-fg)}.k5{background:var(--b5-bg);color:var(--b5-fg)}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:var(--s2);font-size:13px}
+.legend span{padding:var(--s1) var(--s2);border-radius:var(--r-sm)}
+.hint{font-size:13px;line-height:1.45;color:var(--muted);margin:0}
+.swipe{display:none}
+@media (max-width:620px){.swipe{display:inline}}
+
+.sct{font-family:var(--font-display);font-weight:700;font-size:19px;line-height:1.3}
+
+details summary{cursor:pointer;min-height:var(--tap);display:flex;align-items:center;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"+";margin-left:auto;font-size:20px;font-weight:600;color:var(--accent)}
+details[open] summary::after{content:"–"}
+.ranges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s2) var(--s2);margin-top:var(--s2)}
+.ranges label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:var(--s1)}
+.ranges b{grid-column:1/-1;font-size:14px;color:var(--fg);font-weight:700;margin-top:var(--s2)}
+.ranges .num input{text-align:center;padding-inline:var(--s1)}
+.btn{min-height:var(--tap);border:1px solid var(--accent);background:transparent;color:var(--accent);font-weight:700;font-size:15px;padding:0 var(--s4);border-radius:var(--r-sm);cursor:pointer;align-self:flex-start;margin-top:var(--s4)}
+.btn:active{background:var(--accent-bg)}
+
+.foot{font-size:13px;line-height:1.5;color:var(--muted);margin:0;max-width:68ch}
+.ver{font-size:12px;color:var(--muted);margin:0;opacity:.8}
+
+/* aviso de instalação (só no Safari do iPhone, fora do app) */
+.install{position:fixed;left:var(--gutter-l);right:var(--gutter-r);bottom:calc(var(--s3) + env(safe-area-inset-bottom, 0px));z-index:10;
+  max-width:520px;margin:0 auto;background:var(--band-bg);color:var(--band-fg);border:1px solid var(--gold);border-radius:var(--r-md);
+  padding:var(--s3) var(--s2) var(--s3) var(--s4);display:flex;align-items:center;gap:var(--s2);box-shadow:0 6px 24px rgba(0,0,0,.3);font-size:14px;line-height:1.4}
+.install p{margin:0;flex:1}
+.install b{color:var(--gold)}
+.install svg{vertical-align:-3px}
+.install button{flex:none;width:var(--tap);height:var(--tap);border:0;background:transparent;color:var(--band-fg);font-size:22px;cursor:pointer;border-radius:var(--r-sm)}
+.has-install .wrap{padding-bottom:calc(120px + env(safe-area-inset-bottom, 0px))}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}input[type=range]:active::-webkit-slider-thumb{transform:none}}
+</style>
+</head>
+<body>
+
+<header class="band"><div class="band-in">
+  <img class="logo" src="img/logo-creme.png" width="640" height="379" alt="Fazenda Boi Verde">
+  <h1>Simulador de Ágio do Garrote</h1>
+  <p class="sub">Garrote × boi gordo, com produção a pasto e no confinamento</p>
+</div></header>
+
+<main class="wrap">
+
+<section class="panel goal" aria-labelledby="h-goal">
+  <h2 id="h-goal">Meta de rentabilidade</h2>
+  <div class="goal-row">
+    <span class="goalv" id="to" aria-hidden="true">20%</span>
+    <input type="range" id="t" min="0" max="50" step="1" value="20" aria-labelledby="h-goal">
+  </div>
+</section>
+
+<div class="phases">
+  <section class="panel">
+    <h2>Garrote</h2>
+    <div class="row"><label for="w">Peso de compra</label><input type="range" id="w-r" min="6" max="20" step="0.5" aria-label="Peso de compra"><div class="num"><input id="w" type="text" inputmode="decimal" autocomplete="off"><span>@</span></div></div>
+  </section>
+  <section class="panel">
+    <h2>Pasto</h2>
+    <div class="row"><label for="pp">@ produzidas</label><input type="range" id="pp-r" min="0" max="12" step="0.5" aria-label="@ produzidas a pasto"><div class="num"><input id="pp" type="text" inputmode="decimal" autocomplete="off"><span>@</span></div></div>
+    <div class="row"><label for="cp">Custo da @</label><input type="range" id="cp-r" min="50" max="400" step="5" aria-label="Custo da @ a pasto"><div class="num"><input id="cp" type="text" inputmode="decimal" autocomplete="off"><span>R$</span></div></div>
+  </section>
+  <section class="panel">
+    <h2>Confinamento</h2>
+    <div class="row"><label for="pc">@ produzidas</label><input type="range" id="pc-r" min="0" max="14" step="0.5" aria-label="@ produzidas no confinamento"><div class="num"><input id="pc" type="text" inputmode="decimal" autocomplete="off"><span>@</span></div></div>
+    <div class="row"><label for="cc">Custo da @</label><input type="range" id="cc-r" min="100" max="500" step="5" aria-label="Custo da @ no confinamento"><div class="num"><input id="cc" type="text" inputmode="decimal" autocomplete="off"><span>R$</span></div></div>
+  </section>
+  <section class="panel">
+    <h2>Fazenda</h2>
+    <div class="row"><label for="lot">Lotação (1 UA = 450 kg PV)</label><input type="range" id="lot-r" min="1" max="12" step="0.5" aria-label="Lotação"><div class="num"><input id="lot" type="text" inputmode="decimal" autocomplete="off"><span>UA/ha</span></div></div>
+    <p class="hint">Peso vivo do garrote calculado a 30 kg por @.</p>
+  </section>
+</div>
+
+<section class="panel" aria-label="Resumo do lote">
+  <div class="grid2">
+    <div class="stat"><div class="l">Peso final</div><div class="v" id="pf"></div></div>
+    <div class="stat"><div class="l">Custo médio da @ produzida</div><div class="v" id="cm"></div></div>
+    <div class="stat"><div class="l">Peso vivo de compra</div><div class="v" id="pv"></div></div>
+    <div class="stat"><div class="l">Cabeças por hectare</div><div class="v" id="cab"></div></div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Garrote máximo para bater a meta</h2>
+  <div class="tw"><table id="mx"></table></div>
+  <p class="hint">Preço máximo da @ do garrote, para cada preço do boi gordo, mantendo as outras variáveis.<span class="swipe"> Deslize a tabela para o lado.</span></p>
+</section>
+
+<section class="panel">
+  <h2>Tabela de sensibilidade</h2>
+  <div class="seg" role="group" aria-label="Valor exibido na tabela">
+    <button type="button" id="b1" aria-pressed="false">R$/cab</button>
+    <button type="button" id="b2" aria-pressed="true">% rentab.</button>
+    <button type="button" id="b3" aria-pressed="false">Lucro R$/ha</button>
+  </div>
+  <p class="hint">Linhas: garrote R$/@ · Colunas: boi gordo R$/@ · Sublinhado bate a meta · Toque numa célula para ver o cenário.<span class="swipe"> Deslize a tabela para o lado.</span></p>
+  <p class="sel-info" id="selinfo" aria-live="polite"></p>
+  <div class="tw"><table id="tb"></table></div>
+  <div class="legend">
+    <span class="k0">&lt; 0% prejuízo</span><span class="k1">0–10% ruim</span><span class="k2">10–15% aceitável</span>
+    <span class="k3">15–25% boa</span><span class="k4">25–35% muito boa</span><span class="k5">&gt; 35% excelente</span>
+  </div>
+</section>
+
+<section class="panel" id="cenario">
+  <h2>Cenário selecionado</h2>
+  <div class="sct" id="sct"></div>
+  <div class="grid2">
+    <div class="stat"><div class="l">Rentabilidade atual</div><div class="v" id="r1"></div></div>
+    <div class="stat"><div class="l">Resultado por cabeça</div><div class="v" id="r0"></div></div>
+    <div class="stat"><div class="l">Lucro por hectare</div><div class="v" id="r8"></div></div>
+    <div class="stat"><div class="l">Cabeças por hectare</div><div class="v" id="r9"></div></div>
+    <div class="stat"><div class="l">Boi mínimo p/ meta</div><div class="v" id="r2"></div></div>
+    <div class="stat"><div class="l">Garrote máximo p/ meta</div><div class="v" id="r6"></div></div>
+    <div class="stat"><div class="l">@ a pasto necessárias</div><div class="v" id="r3"></div></div>
+    <div class="stat"><div class="l">Custo máx. @ pasto</div><div class="v" id="r4"></div></div>
+    <div class="stat"><div class="l">Custo máx. @ confinamento</div><div class="v" id="r5"></div></div>
+    <div class="stat"><div class="l">Investimento por cabeça</div><div class="v" id="r7"></div></div>
+  </div>
+  <p class="hint">Cada valor de meta ajusta só aquela variável e mantém as outras como estão. "Inviável" quando nem mexendo nela se chega à meta.</p>
+</section>
+
+<section class="panel">
+  <details>
+    <summary>Faixas de preço da tabela</summary>
+    <div class="ranges">
+      <b>Garrote (R$/@)</b>
+      <label for="g0">De<div class="num"><input id="g0" type="text" inputmode="decimal" autocomplete="off"></div></label>
+      <label for="g1">Até<div class="num"><input id="g1" type="text" inputmode="decimal" autocomplete="off"></div></label>
+      <label for="gs">Passo<div class="num"><input id="gs" type="text" inputmode="decimal" autocomplete="off"></div></label>
+      <b>Boi gordo (R$/@)</b>
+      <label for="o0">De<div class="num"><input id="o0" type="text" inputmode="decimal" autocomplete="off"></div></label>
+      <label for="o1">Até<div class="num"><input id="o1" type="text" inputmode="decimal" autocomplete="off"></div></label>
+      <label for="os">Passo<div class="num"><input id="os" type="text" inputmode="decimal" autocomplete="off"></div></label>
+    </div>
+    <button type="button" class="btn" id="reset">Voltar aos valores padrão</button>
+  </details>
+</section>
+
+<p class="foot">Resultado = peso final × boi − peso de compra × garrote − @ pasto × custo pasto − @ confinamento × custo confinamento. Rentabilidade = resultado ÷ (compra do garrote + custo das @ a pasto). Cabeças/ha = lotação × 450 kg ÷ peso vivo de compra. Lucro/ha = resultado por cabeça × cabeças/ha. Os valores iniciais são exemplos; ajuste para os seus números.</p>
+<p class="ver">Versão 1.0 · funciona sem internet depois de aberto uma vez</p>
+</main>
+
+<div class="install" id="install" hidden role="dialog" aria-label="Instalar o app">
+  <p>Para instalar: toque em <b>Compartilhar</b>
+    <svg width="16" height="18" viewBox="0 0 16 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 11V1M4.5 4.5 8 1l3.5 3.5M3 7.5H1.5v9h13v-9H13" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    e depois em <b>Adicionar à Tela de Início</b>.</p>
+  <button type="button" id="install-x" aria-label="Fechar aviso">×</button>
+</div>
+
+<script>
+var DEF={t:20,w:12,pp:5,cp:180,pc:6,cc:280,g0:400,g1:480,gs:10,o0:300,o1:400,os:10,mode:2,sg:440,sb:370,lot:6};
+var KEY='simulador-agio-bv-v1',S={};
+try{S=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){S={}}
+for(var k in DEF){if(typeof S[k]!=='number'||!isFinite(S[k]))S[k]=DEF[k]}
+function $(i){return document.getElementById(i)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function f(n){return Math.round(n).toLocaleString('pt-BR')}
+function pct(n){return n.toFixed(1).replace('.',',')+'%'}
+function dec(n){return String(n).replace('.',',')}
+function parse(s){s=String(s).trim().replace(/\s/g,'');if(s.indexOf(',')>=0)s=s.replace(/\./g,'').replace(',','.');return parseFloat(s)}
+function band(r){return r<0?0:r<10?1:r<15?2:r<25?3:r<35?4:5}
+function seq(a,b,s){var o=[];if(s<=0)s=10;if(b<a){var x=a;a=b;b=x}for(var v=a;v<=b+1e-9&&o.length<40;v+=s)o.push(Math.round(v*100)/100);return o}
+function fill(r){var mn=+r.min,mx=+r.max,v=+r.value;r.style.setProperty('--p',(mx>mn?Math.min(100,Math.max(0,(v-mn)/(mx-mn)*100)):0)+'%')}
+
+var pairs=['w','pp','cp','pc','cc','lot'];
+pairs.forEach(function(id){
+  var n=$(id),r=$(id+'-r');n.value=dec(S[id]);r.value=S[id];fill(r);
+  r.addEventListener('input',function(){S[id]=+r.value;n.value=dec(r.value);fill(r);draw()});
+  n.addEventListener('input',function(){var v=parse(n.value);if(isFinite(v)&&v>=0){S[id]=v;r.value=v;fill(r);draw()}});
+  n.addEventListener('blur',function(){n.value=dec(S[id])});
+});
+var rangeIds=['g0','g1','gs','o0','o1','os'];
+rangeIds.forEach(function(id){
+  var n=$(id);n.value=dec(S[id]);
+  n.addEventListener('input',function(){var v=parse(n.value);if(isFinite(v)&&v>0){S[id]=v;draw()}});
+  n.addEventListener('blur',function(){n.value=dec(S[id])});
+});
+$('t').value=S.t;fill($('t'));
+$('t').addEventListener('input',function(){S.t=+this.value;fill(this);draw()});
+function setMode(m){S.mode=m;[1,2,3].forEach(function(i){$('b'+i).setAttribute('aria-pressed',m==i)});draw()}
+$('b1').onclick=function(){setMode(1)};$('b2').onclick=function(){setMode(2)};$('b3').onclick=function(){setMode(3)};
+$('tb').addEventListener('click',function(e){var c=e.target.closest('td');if(!c)return;S.sg=+c.dataset.g;S.sb=+c.dataset.b;draw()});
+$('reset').onclick=function(){
+  for(var k in DEF)S[k]=DEF[k];
+  pairs.forEach(function(id){$(id).value=dec(S[id]);$(id+'-r').value=S[id];fill($(id+'-r'))});
+  rangeIds.forEach(function(id){$(id).value=dec(S[id])});
+  $('t').value=S.t;fill($('t'));setMode(S.mode);
+};
+
+function draw(){
+  var T=S.t/100,k=1+T,w=S.w,pp=S.pp,cp=S.cp,pc=S.pc,cc=S.cc,W=w+pp+pc;
+  $('to').textContent=S.t+'%';
+  $('t').setAttribute('aria-valuetext',S.t+'%');
+  $('pf').textContent=W.toLocaleString('pt-BR')+'@';
+  var tp=pp+pc;$('cm').textContent=tp>0?'R$ '+f((pp*cp+pc*cc)/tp):'–';
+  var pvk=w*30,cab=pvk>0?S.lot*450/pvk:0;
+  $('pv').textContent=f(pvk)+' kg';
+  $('cab').textContent=cab.toFixed(2).replace('.',',');
+  $('r9').textContent=cab.toFixed(2).replace('.',',');
+  function res(g,b){return W*b-w*g-pp*cp-pc*cc}
+  function inv(g){return w*g+pp*cp}
+  function rt(g,b){var i=inv(g);return i>0?res(g,b)/i*100:0}
+  function gmax(b){return (W*b-pc*cc-pp*cp*k)/(w*k)}
+  var gs=seq(S.g0,S.g1,S.gs),bs=seq(S.o0,S.o1,S.os);
+  if(gs.indexOf(S.sg)<0)S.sg=gs[Math.floor(gs.length/2)];
+  if(bs.indexOf(S.sb)<0)S.sb=bs[Math.floor(bs.length/2)];
+  var mb=band(S.t);
+  var m='<tr><th scope="row">Boi</th>';bs.forEach(function(b){m+='<th scope="col">'+f(b)+'</th>'});m+='</tr><tr><th scope="row">Garr.</th>';
+  bs.forEach(function(b){var g=gmax(b);m+='<td class="k'+(g>0?mb:0)+'">'+(g>0?f(g):'–')+'</td>'});
+  $('mx').innerHTML=m+'</tr>';
+  var h='<tr><th scope="col">G \\ B</th>';bs.forEach(function(b){h+='<th scope="col">'+f(b)+'</th>'});h+='</tr>';
+  gs.forEach(function(g){h+='<tr><th scope="row">'+f(g)+'</th>';
+    bs.forEach(function(b){var r=rt(g,b);
+      var cl='k'+band(r)+(r>=S.t-1e-9?' hit':'')+(g===S.sg&&b===S.sb?' sel':'');
+      var txt=S.mode==1?f(res(g,b)):S.mode==2?pct(r):f(res(g,b)*cab);
+      h+='<td class="'+cl+'" data-g="'+g+'" data-b="'+b+'">'+txt+'</td>'});
+    h+='</tr>'});
+  $('tb').innerHTML=h;
+
+  var g=S.sg,b=S.sb,R=res(g,b),I=inv(g),NA='Inviável';
+  function sv(id,txt,neg){var e=$(id);e.textContent=txt;e.className='v'+(neg?' neg':'')}
+  $('sct').textContent='Garrote R$ '+f(g)+' · Boi R$ '+f(b)+' por @';
+  $('selinfo').innerHTML='Selecionado: garrote <b>R$ '+f(g)+'</b> · boi <b>R$ '+f(b)+'</b> → <b>'+pct(rt(g,b))+'</b>, R$ '+f(R)+'/cab';
+  sv('r1',pct(rt(g,b)),R<0);
+  sv('r0','R$ '+f(R),R<0);
+  sv('r8','R$ '+f(R*cab)+'/ha',R<0);
+  var bmin=W>0?(T*I+w*g+pp*cp+pc*cc)/W:NaN;
+  sv('r2',isFinite(bmin)&&bmin>0?'R$ '+f(bmin)+'/@':NA);
+  var gm=gmax(b);
+  sv('r6',isFinite(gm)&&gm>0?'R$ '+f(gm)+'/@':NA);
+  var den=b-cp*k,ppn=den>0?(w*g*k+pc*cc-(w+pc)*b)/den:NaN;
+  if(isFinite(ppn)&&ppn<0)ppn=0;
+  sv('r3',isFinite(ppn)?ppn.toFixed(1).replace('.',',')+'@':NA);
+  var cpm=pp>0?(W*b-w*g*k-pc*cc)/(pp*k):NaN;
+  sv('r4',isFinite(cpm)&&cpm>0?'R$ '+f(cpm)+'/@':NA);
+  var ccm=pc>0?(W*b-k*(w*g+pp*cp))/pc:NaN;
+  sv('r5',isFinite(ccm)&&ccm>0?'R$ '+f(ccm)+'/@':NA);
+  sv('r7','R$ '+f(I));
+  save();
+}
+setMode(S.mode);
+
+/* aviso de instalação no iPhone/iPad (Safari, fora do modo app) */
+(function(){
+  var ua=navigator.userAgent||'';
+  var ios=/iphone|ipad|ipod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  var standalone=navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+  var dismissed=false;try{dismissed=localStorage.getItem(KEY+'-install')==='1'}catch(e){}
+  if(ios&&!standalone&&!dismissed){$('install').hidden=false;document.body.classList.add('has-install')}
+  $('install-x').onclick=function(){$('install').hidden=true;document.body.classList.remove('has-install');try{localStorage.setItem(KEY+'-install','1')}catch(e){}};
+})();
+
+/* modo offline */
+if('serviceWorker' in navigator&&location.protocol!=='file:'){
+  window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
+}
+</script>
+</body>
+</html>

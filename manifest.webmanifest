@@ -1,0 +1,17 @@
+{
+  "name": "Simulador de Ágio do Garrote",
+  "short_name": "Ágio Garrote",
+  "description": "Simulador de ágio do garrote × boi gordo, com produção a pasto e no confinamento. Fazendas Boi Verde.",
+  "lang": "pt-BR",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#14301f",
+  "theme_color": "#14301f",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
